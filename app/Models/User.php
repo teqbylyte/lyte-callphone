@@ -69,31 +69,6 @@ class User extends Authenticatable
      */
     public function avatar(): Attribute
     {
-        return Attribute::get( fn($value) => Storage::url($value) );
-    }
-
-    /**
-     * Create the api access token for the authenticated user to be used in authenticating api requests
-     *
-     * @return array An array containing the auth user details and the generated token
-     */
-    public function generateApiToken(): array
-    {
-        // create token for this user.
-        $tokenObject = $this->createToken("$this->username personal token", ['*']);
-
-        // save user token
-        $tokenObject->token->save();
-
-        $access_token = [
-            'token' => $tokenObject->accessToken,
-            'type' => 'Bearer',
-            'expires_at' => Carbon::parse($tokenObject->token->expires_at)->toDateTimeString()
-        ];
-
-        $user = $this->only('id', 'name', 'username', 'email', 'avatar');
-        $user['auth'] = $access_token;
-
-        return $user;
+        return Attribute::get( fn($value) => url(Storage::url($value)));
     }
 }
