@@ -22,7 +22,7 @@ class UserFactory extends Factory
             'email' => fake()->safeEmail(),
             'email_verified_at' => now(),
             'password' => 'callphone234', // password
-            'remember_token' => Str::random(10),
+            'remember_token' => null,
         ];
     }
 
