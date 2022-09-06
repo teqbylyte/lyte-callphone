@@ -6,8 +6,10 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
@@ -45,11 +47,36 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        return $this->where('username', $value)->firstOrFail();
+    }
+
+    /**
+     * Encrypt password before saving it.
+     *
+     * @return Attribute
+     */
     public function password(): Attribute
     {
         return Attribute::set( fn($value) => bcrypt($value) );
     }
 
+    /**
+     * Get the avatar with the url path.
+     *
+     * @return Attribute
+     */
+    public function avatar(): Attribute
+    {
+        return Attribute::get( fn($value) => Storage::url($value) );
+    }
+
+    /**
+     * Create the api access token for the authenticated user to be used in authenticating api requests
+     *
+     * @return array An array containing the auth user details and the generated token
+     */
     public function generateApiToken(): array
     {
         // create token for this user.
@@ -64,12 +91,9 @@ class User extends Authenticatable
             'expires_at' => Carbon::parse($tokenObject->token->expires_at)->toDateTimeString()
         ];
 
-        return [
-            'id'        => $this->id,
-            'name'      => $this->name,
-            'username'  => $this->username,
-            'email'     => $this->email,
-            'auth'      => $access_token,
-        ];
+        $user = $this->only('id', 'name', 'username', 'email', 'avatar');
+        $user['auth'] = $access_token;
+
+        return $user;
     }
 }
