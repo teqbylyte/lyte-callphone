@@ -59,7 +59,7 @@ class User extends Authenticatable
      */
     public function password(): Attribute
     {
-        return Attribute::set( fn($value) => is_null($value) ? null : bcrypt($value) );
+        return Attribute::set( fn($value) => bcrypt($value) );
     }
 
     /**
@@ -69,6 +69,6 @@ class User extends Authenticatable
      */
     public function avatar(): Attribute
     {
-        return Attribute::get( fn($value) => url(Storage::url($value)));
+        return Attribute::get( fn($value) => is_null($value) ? null : url(Storage::url($value)));
     }
 }
